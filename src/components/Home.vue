@@ -33,7 +33,7 @@
   import app from '../firebaseConfig'
 
   let db = app.database();
-  let allWinners = db.ref('/winners')
+  let allWinners = db.ref('/')
 
 
 export default {
@@ -56,7 +56,7 @@ export default {
         date: date.toDateString()
       };
       this.logWin = false
-      db.ref('/winners').push(payload)
+      db.ref('/').push(payload)
     },
     logWinner () {
       this.logWin = true
