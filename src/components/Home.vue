@@ -67,10 +67,11 @@ export default {
     },
     getTopLeader () {
       let obj = {};
+      this.totalGames = 0
 
-      for(var key in this.winners) {
+      for(var i = 0; i < this.winners.length; i++) {
         //builds an obj of all winners and the number of games they have won
-        obj[this.winners[key].name] === undefined ? obj[this.winners[key].name] = 1 : obj[this.winners[key].name]++
+        obj[this.winners[i].name] === undefined ? obj[this.winners[i].name] = 1 : obj[this.winners[i].name]++
 
         //updates total number of games played
         this.totalGames++
@@ -91,11 +92,12 @@ export default {
       var winnersBank = [];
 
       snapshot.forEach((childSnap) => {
-        let item = childSnap.val();
-        item.key = childSnap.key;
+        let item = childSnap.val()
+        item.key = childSnap.key
         winnersBank.push(item)
       })
-      this.winners = winnersBank;
+      this.winners = winnersBank.reverse();
+      this.getTopLeader();
     })
   }
 }
