@@ -111,8 +111,6 @@ export default {
   background-color: #5CDB95;
   height: 100%;
   padding: 1rem;
-  height: 100%;
-  height: 100vh;
 }
 
 .top-leader, .total-games {
