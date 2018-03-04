@@ -23,6 +23,7 @@
           <div class="winner-date">
             <span class="label">On:</span> {{ winner.date }}
           </div>
+          <button @click="removeWinner(winner.key)">Delete</button>
         </div>
       </div>
     </div>
@@ -61,6 +62,9 @@ export default {
     logWinner () {
       this.logWin = true
     },
+    removeWinner (key) {
+      db.ref('/' + key).remove()
+    },
     getTopLeader () {
       let obj = {};
 
@@ -84,9 +88,14 @@ export default {
   },
   mounted(){
     allWinners.on('value', (snapshot) => {
-      this.winners = snapshot.val();
+      var winnersBank = [];
 
-      this.getTopLeader()
+      snapshot.forEach((childSnap) => {
+        let item = childSnap.val();
+        item.key = childSnap.key;
+        winnersBank.push(item)
+      })
+      this.winners = winnersBank;
     })
   }
 }
@@ -102,6 +111,8 @@ export default {
   background-color: #5CDB95;
   height: 100%;
   padding: 1rem;
+  height: 100%;
+  height: 100vh;
 }
 
 .top-leader, .total-games {
