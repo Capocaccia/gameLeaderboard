@@ -23,7 +23,7 @@
           <div class="winner-date">
             <span class="label">On:</span> {{ winner.date }}
           </div>
-          <button @click="removeWinner(winner.key)">Delete</button>
+          <button @click="removeWinner(winner.key)" v-if="deleteActive">Delete</button>
         </div>
       </div>
     </div>
@@ -46,7 +46,8 @@ export default {
       logWin: false,
       leader: '',
       leaderCount: 0,
-      totalGames: 0
+      totalGames: 0,
+      deleteActive: false
     }
   },
   methods: {
@@ -85,6 +86,17 @@ export default {
         //gets the name of the leader
         this.leader = obj[key] === this.leaderCount ? key : this.leader
       }
+    },
+    activateDelete () {
+      const code = 'ArrowUpArrowUpArrowDownArrowDownArrowLeftArrowRightArrowLeftArrowRightbaEnter';
+      let pressed = [];
+      window.addEventListener('keyup', (e) => {
+        pressed.push(e.key);
+        pressed.splice(-code.length - 1, pressed.length - code.length);
+        if(pressed.join('') === code){
+          this.deleteActive = true
+        }
+      })
     }
   },
   mounted(){
@@ -98,6 +110,7 @@ export default {
       })
       this.winners = winnersBank.reverse();
       this.getTopLeader();
+      this.activateDelete();
     })
   }
 }
