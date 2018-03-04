@@ -69,6 +69,7 @@ export default {
     getTopLeader () {
       let obj = {};
       this.totalGames = 0
+      let winners = [];
 
       for(var i = 0; i < this.winners.length; i++) {
         //builds an obj of all winners and the number of games they have won
@@ -84,7 +85,11 @@ export default {
         this.leaderCount === 0 ? this.leaderCount = obj[key] : obj[key] > this.leaderCount ? this.leaderCount = obj[key] : ''
 
         //gets the name of the leader
-        this.leader = obj[key] === this.leaderCount ? key : this.leader
+        if(obj[key] === this.leaderCount) {
+          winners.push(key)
+        }
+
+        this.leader = winners.length > 1 ? 'Its a Tie Between ' + winners.join(',') : winners[0]
       }
     },
     activateDelete () {
