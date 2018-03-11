@@ -3,7 +3,10 @@
     <button class="log-win btn-3d green" @click="logWinner()" v-if="!logWin">Log Win</button>
     <div class="log-winner" v-if="logWin">
       <div>
-        <input placeholder="Winners Name" type="text" v-model="name">
+        <input placeholder="First Place" type="text" v-model="firstPlace">
+        <input placeholder="Second Place" type="text" v-model="secondPlace">
+        <input placeholder="Third Place" type="text" v-model="thirdPlace">
+        <input placeholder="Fourth Place" type="text" v-model="fourthPlace">
       </div>
       <div>
         <button @click="sendToFirebase()">Log Winner</button>
@@ -18,12 +21,21 @@
         <div class="divider"></div>
         <div class="winner-data">
           <div class="winner-name">
-            <span class="label">Winner:</span> {{ winner.name }}
+            <span class="label">Winner:</span> {{ winner.firstPlace }}
+          </div>
+          <div class="winner-name">
+            <span class="label">Second Place:</span> {{ winner.secondPlace }}
+          </div>
+          <div class="winner-name">
+            <span class="label">Third Place:</span> {{ winner.thirdPlace }}
+          </div>
+          <div class="winner-name">
+            <span class="label">Fourth Place:</span> {{ winner.fourthPlace }}
           </div>
           <div class="winner-date">
             <span class="label">On:</span> {{ winner.date }}
           </div>
-          <button @click="removeWinner(winner.key)">Delete</button>
+          <button @click="removeWinner()">Delete</button>
         </div>
       </div>
     </div>
@@ -41,7 +53,10 @@ export default {
   name: 'Home',
   data () {
     return {
-      name: '',
+      firstPlace: '',
+      secondPlace: '',
+      thirdPlace: '',
+      fourthPlace: '',
       winners: [],
       logWin: false,
       leader: '',
@@ -53,11 +68,30 @@ export default {
     sendToFirebase () {
       let date = new Date
       let payload = {
-        name: this.name,
-        date: date.toDateString()
-      };
+        games: {
+          
+          } 
+        }
+
+      let winners = {
+            firstPlace: this.firstPlace,
+            secondPlace: this.secondPlace,
+            thirdPlace: this.thirdPlace,
+            fourthPlace: this.fourthPlace,
+          }
+
       this.logWin = false
-      db.ref('/').push(payload)
+
+      //sets the data structure
+      db.ref(`/${date.toDateString()}/date`).push(payload)
+
+      //sets the date
+      db.ref(`/${date.toDateString()}/date`).set({
+        date: date.toDateString()
+      })
+
+      //adds the winners
+      db.ref(`/${date.toDateString()}/games`).push(winners)
     },
     logWinner () {
       this.logWin = true
@@ -90,11 +124,16 @@ export default {
     allWinners.on('value', (snapshot) => {
       var winnersBank = [];
 
+      //builds an array of all the winners in the DB
       snapshot.forEach((childSnap) => {
         let item = childSnap.val();
-        item.key = childSnap.key;
-        winnersBank.push(item)
+        let date = item.date.date;
+        for(var game in item.games) {
+          item.games[game].date = date
+          winnersBank.push(item.games[game])
+        }
       })
+
       this.winners = winnersBank;
     })
   }
