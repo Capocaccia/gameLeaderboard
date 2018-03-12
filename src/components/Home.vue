@@ -3,25 +3,33 @@
     <button class="log-win btn-3d green" @click="logWinner()" v-if="!logWin">Log Win</button>
     <div class="log-winner" v-if="logWin">
       <div>
-        <input placeholder="First Place" type="text" v-model="firstPlace">
-        <input placeholder="Second Place" type="text" v-model="secondPlace">
-        <input placeholder="Third Place" type="text" v-model="thirdPlace">
-        <input placeholder="Fourth Place" type="text" v-model="fourthPlace">
+        <div>
+          <input placeholder="First Place" type="text" v-model="firstPlace">
+        </div>
+        <div>
+          <input placeholder="Second Place" type="text" v-model="secondPlace">
+        </div>
+        <div>
+          <input placeholder="Third Place" type="text" v-model="thirdPlace">
+        </div>
+        <div>
+          <input placeholder="Fourth Place" type="text" v-model="fourthPlace">
+        </div>
       </div>
       <div>
         <button @click="sendToFirebase()">Log Winner</button>
         <button @click="logWin = false">Close</button>
       </div>
     </div>
-    <h1 class="top-leader">Current leader is: {{ leader }} with {{ leaderCount }} wins!</h1>
-    <h2 class="total-games">Total Games Played: {{ totalGames }}</h2>
+    <!--<h1 class="top-leader">Current leader is: {{ leader }} with {{ leaderCount }} wins!</h1>-->
+    <!--<h2 class="total-games">Total Games Played: {{ totalGames }}</h2>-->
     <h2 class="total-games">Current Game: Uno</h2>
     <div class="leaderboard">
       <h2>Leaderboard</h2>
       <div class="winner" v-for="winner in winners">
         <div class="divider"></div>
         <div class="winner-data">
-          <div class="winner-name">
+          <div class="winner-name" v-if="winner[0]">
             <span class="label">Winner:</span> {{ winner[0] }}
             <div v-if="editActive">
               <input type="text" v-model="updateText">
@@ -29,7 +37,7 @@
               <button @click="removeWinner(winner.date, winner.key, 0)">Delete</button>
             </div>
           </div>
-          <div class="winner-name">
+          <div class="winner-name" v-if="winner[1]">
             <span class="label">Second Place:</span> {{ winner[1] }}
             <div v-if="editActive">
               <input type="text" v-model="updateText">
@@ -37,7 +45,7 @@
               <button @click="removeWinner(winner.date, winner.key, 1)">Delete</button>
             </div>
           </div>
-          <div class="winner-name">
+          <div class="winner-name" v-if="winner[2]">
             <span class="label">Third Place:</span> {{ winner[2] }}
             <div v-if="editActive">
               <input type="text" v-model="updateText">
@@ -45,7 +53,7 @@
               <button @click="removeWinner(winner.date, winner.key, 2)">Delete</button>
             </div>
           </div>
-          <div class="winner-name">
+          <div class="winner-name" v-if="winner[3]">
             <span class="label">Fourth Place:</span> {{ winner[3] }}
             <div v-if="editActive">
               <input type="text" v-model="updateText">
@@ -82,7 +90,7 @@ export default {
       leader: '',
       leaderCount: 0,
       totalGames: 0,
-      editActive: true,
+      editActive: false,
       updateText: ''
     }
   },
@@ -185,15 +193,16 @@ export default {
         }
       })
 
-      this.winners = winnersBank;
+      this.winners = winnersBank.reverse();
       this.activateDelete();
+//      this.getTopLeader()
     })
   }
 }
 </script>
 
-
 <style scoped>
+
 .label {
   font-weight: bold;
 }
