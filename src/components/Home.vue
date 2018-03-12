@@ -15,6 +15,7 @@
     </div>
     <h1 class="top-leader">Current leader is: {{ leader }} with {{ leaderCount }} wins!</h1>
     <h2 class="total-games">Total Games Played: {{ totalGames }}</h2>
+    <h2 class="total-games">Current Game: Uno</h2>
     <div class="leaderboard">
       <h2>Leaderboard</h2>
       <div class="winner" v-for="winner in winners">
@@ -22,20 +23,35 @@
         <div class="winner-data">
           <div class="winner-name">
             <span class="label">Winner:</span> {{ winner[0] }}
-            <button @click="removeWinner(winner.date, winner.key, 0)" v-if="deleteActive">Delete</button>
+            <div v-if="editActive">
+              <input type="text" v-model="updateText">
+              <button @click="updateWinner(winner.date, winner.key, 0)">Update</button>
+              <button @click="removeWinner(winner.date, winner.key, 0)">Delete</button>
+            </div>
           </div>
           <div class="winner-name">
             <span class="label">Second Place:</span> {{ winner[1] }}
-            <button @click="removeWinner(winner.date, winner.key, 1)" v-if="deleteActive">Delete</button>
+            <div v-if="editActive">
+              <input type="text" v-model="updateText">
+              <button @click="updateWinner(winner.date, winner.key, 1)">Update</button>
+              <button @click="removeWinner(winner.date, winner.key, 1)">Delete</button>
+            </div>
           </div>
           <div class="winner-name">
             <span class="label">Third Place:</span> {{ winner[2] }}
-            <button @click="removeWinner(winner.date, winner.key, 2)" v-if="deleteActive">Delete</button>
+            <div v-if="editActive">
+              <input type="text" v-model="updateText">
+              <button @click="updateWinner(winner.date, winner.key, 2)">Update</button>
+              <button @click="removeWinner(winner.date, winner.key, 2)">Delete</button>
+            </div>
           </div>
           <div class="winner-name">
             <span class="label">Fourth Place:</span> {{ winner[3] }}
-            <button @click="removeWinner(winner.date, winner.key, 3)" v-if="deleteActive">Delete</button>
-
+            <div v-if="editActive">
+              <input type="text" v-model="updateText">
+              <button @click="updateWinner(winner.date, winner.key, 3)"> Update</button>
+              <button @click="removeWinner(winner.date, winner.key, 3)">Delete</button>
+            </div>
           </div>
           <div class="winner-date">
             <span class="label">On:</span> {{ winner.date }}
@@ -66,7 +82,8 @@ export default {
       leader: '',
       leaderCount: 0,
       totalGames: 0,
-      deleteActive: false
+      editActive: true,
+      updateText: ''
     }
   },
   methods: {
@@ -75,8 +92,8 @@ export default {
       let dateKey = date.toDateString().split(' ').join('')
       let payload = {
         games: {
-          
-          } 
+
+          }
         }
 
       let winners = {}
@@ -104,8 +121,15 @@ export default {
     },
     removeWinner (date, key, idx) {
       let dateKey = date.split(' ').join('')
-      console.log(`${dateKey}/games/${key}/idx`)
       db.ref(`/${dateKey}/games/${key}/${idx}`).remove()
+    },
+    updateWinner (date, key, idx) {
+      let dateKey = date.split(' ').join('')
+
+      let update = {}
+
+      update[`/${dateKey}/games/${key}/${idx}`] = this.updateText;
+      db.ref().update(update)
     },
     getTopLeader () {
       let obj = {};
@@ -140,7 +164,7 @@ export default {
         pressed.push(e.key);
         pressed.splice(-code.length - 1, pressed.length - code.length);
         if(pressed.join('') === code){
-          this.deleteActive = true
+          this.editActive = true
         }
       })
     }
@@ -162,6 +186,7 @@ export default {
       })
 
       this.winners = winnersBank;
+      this.activateDelete();
     })
   }
 }
