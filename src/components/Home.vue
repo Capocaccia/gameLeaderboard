@@ -1,6 +1,7 @@
 <template>
   <div class="dashboard">
     <button class="log-win btn-3d green" @click="logWinner()" v-if="!logWin">Log Win</button>
+    <button @click="goToStats()" v-if="!logWin">More Stats</button>
     <div class="log-winner" v-if="logWin">
       <div>
         <div>
@@ -17,14 +18,15 @@
         </div>
       </div>
       <div>
-        <button @click="sendToFirebase()">Log Winner</button>
+        <button @click="sendToFirebase()">Log Winners</button>
         <button @click="logWin = false">Close</button>
       </div>
     </div>
-    <!--<h1 class="top-leader">Current leader is: {{ leader }} with {{ leaderCount }} wins!</h1>-->
-    <!--<h2 class="total-games">Total Games Played: {{ totalGames }}</h2>-->
+    <h1 class="top-leader">Current leader is: {{ leader }} with {{ leaderCount }} wins!</h1>
+    <h2 class="total-games">Total Games Played: {{ totalGames }}</h2>
     <h2 class="total-games">Current Game: Uno</h2>
     <div class="leaderboard">
+      <button v-if="editActive" @click="editActive = false"> Exit Edit Mode </button>
       <h2>Leaderboard</h2>
       <div class="winner" v-for="winner in winners">
         <div class="divider"></div>
@@ -33,32 +35,32 @@
             <span class="label">Winner:</span> {{ winner[0] }}
             <div v-if="editActive">
               <input type="text" v-model="updateText">
-              <button @click="updateWinner(winner.date, winner.key, 0)">Update</button>
-              <button @click="removeWinner(winner.date, winner.key, 0)">Delete</button>
+              <button @click="updateWinner(winner.parentKey, winner.key, 0)">Update</button>
+              <button @click="removeWinner(winner.parentKey, winner.key, 0)">Delete</button>
             </div>
           </div>
           <div class="winner-name" v-if="winner[1]">
             <span class="label">Second Place:</span> {{ winner[1] }}
             <div v-if="editActive">
               <input type="text" v-model="updateText">
-              <button @click="updateWinner(winner.date, winner.key, 1)">Update</button>
-              <button @click="removeWinner(winner.date, winner.key, 1)">Delete</button>
+              <button @click="updateWinner(winner.parentKey, winner.key, 1)">Update</button>
+              <button @click="removeWinner(winner.parentKey, winner.key, 1)">Delete</button>
             </div>
           </div>
           <div class="winner-name" v-if="winner[2]">
             <span class="label">Third Place:</span> {{ winner[2] }}
             <div v-if="editActive">
               <input type="text" v-model="updateText">
-              <button @click="updateWinner(winner.date, winner.key, 2)">Update</button>
-              <button @click="removeWinner(winner.date, winner.key, 2)">Delete</button>
+              <button @click="updateWinner(winner.parentKey, winner.key, 2)">Update</button>
+              <button @click="removeWinner(winner.parentKey, winner.key, 2)">Delete</button>
             </div>
           </div>
           <div class="winner-name" v-if="winner[3]">
             <span class="label">Fourth Place:</span> {{ winner[3] }}
             <div v-if="editActive">
               <input type="text" v-model="updateText">
-              <button @click="updateWinner(winner.date, winner.key, 3)"> Update</button>
-              <button @click="removeWinner(winner.date, winner.key, 3)">Delete</button>
+              <button @click="updateWinner(winner.parentKey, winner.key, 3)"> Update</button>
+              <button @click="removeWinner(winner.parentKey, winner.key, 3)">Delete</button>
             </div>
           </div>
           <div class="winner-date">
@@ -97,7 +99,7 @@ export default {
   methods: {
     sendToFirebase () {
       let date = new Date
-      let dateKey = date.toDateString().split(' ').join('')
+      let winnersKey = db.ref().push().key
       let payload = {
         games: {
 
@@ -114,29 +116,33 @@ export default {
       this.logWin = false
 
       //sets the data structure
-      db.ref(`/${dateKey}/date`).push(payload)
+      db.ref(`/${winnersKey}/date`).push(payload)
 
       //sets the date
-      db.ref(`/${dateKey}/date`).set({
+      db.ref(`/${winnersKey}/date`).set({
         date: date.toDateString()
       })
 
       //adds the winners
-      db.ref(`/${dateKey}/games`).push(winners)
+      db.ref(`/${winnersKey}/games`).push(winners)
+
+      this.firstPlace = ''
+      this.secondPlace = ''
+      this.thirdPlace = ''
+      this.fourthPlace = ''
     },
     logWinner () {
       this.logWin = true
     },
-    removeWinner (date, key, idx) {
-      let dateKey = date.split(' ').join('')
-      db.ref(`/${dateKey}/games/${key}/${idx}`).remove()
+    removeWinner (parentKey, key, idx) {
+      db.ref(`/${parentKey}/games/${key}/${idx}`).remove()
     },
     updateWinner (date, key, idx) {
-      let dateKey = date.split(' ').join('')
+      let winnersKey = date.split(' ').join('')
 
       let update = {}
 
-      update[`/${dateKey}/games/${key}/${idx}`] = this.updateText;
+      update[`/${winnersKey}/games/${key}/${idx}`] = this.updateText;
       db.ref().update(update)
     },
     getTopLeader () {
@@ -145,11 +151,15 @@ export default {
       let winners = [];
 
       for(var i = 0; i < this.winners.length; i++) {
-        //builds an obj of all winners and the number of games they have won
-        obj[this.winners[i].name] === undefined ? obj[this.winners[i].name] = 1 : obj[this.winners[i].name]++
+        let gameWinners = this.winners[i]; 
 
-        //updates total number of games played
+        //builds an obj of all winners and the number of games they have won
+        obj[gameWinners[0]] === undefined ? obj[gameWinners[0]] = 1 : obj[gameWinners[0]]++
+
+
+        // //updates total number of games played
         this.totalGames++
+
       }
 
       for(var key in obj) {
@@ -163,9 +173,10 @@ export default {
         }
 
         this.leader = winners.length > 1 ? 'Its a Tie Between ' + winners.join(',') : winners[0]
-      }
+      } 
+
     },
-    activateDelete () {
+    activateEdit () {
       const code = 'ArrowUpArrowUpArrowDownArrowDownArrowLeftArrowRightArrowLeftArrowRightbaEnter';
       let pressed = [];
       window.addEventListener('keyup', (e) => {
@@ -175,11 +186,15 @@ export default {
           this.editActive = true
         }
       })
+    },
+    goToStats() {
+      this.$router.push('stats')
     }
   },
   mounted(){
     allWinners.on('value', (snapshot) => {
       var winnersBank = [];
+
 
       //builds an array of all the winners in the DB
       snapshot.forEach((childSnap) => {
@@ -187,6 +202,7 @@ export default {
         let date = item.date.date;
 
         for(var game in item.games) {
+          item.games[game].parentKey = childSnap.key
           item.games[game].key = game
           item.games[game].date = date
           winnersBank.push(item.games[game])
@@ -194,9 +210,13 @@ export default {
       })
 
       this.winners = winnersBank.reverse();
-      this.activateDelete();
-//      this.getTopLeader()
+      this.activateEdit();
     })
+  },
+  watch: {
+    winners: function () {
+      this.getTopLeader()
+    }
   }
 }
 </script>
