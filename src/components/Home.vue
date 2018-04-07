@@ -17,7 +17,7 @@
         </div>
       </div>
       <div>
-        <button @click="sendToFirebase()">Log Winner</button>
+        <button @click="sendToFirebase()">Log Winners</button>
         <button @click="logWin = false">Close</button>
       </div>
     </div>
@@ -97,7 +97,7 @@ export default {
   methods: {
     sendToFirebase () {
       let date = new Date
-      let dateKey = date.toDateString().split(' ').join('')
+      let winnersKey = db.ref().push().key
       let payload = {
         games: {
 
@@ -114,29 +114,34 @@ export default {
       this.logWin = false
 
       //sets the data structure
-      db.ref(`/${dateKey}/date`).push(payload)
+      db.ref(`/${winnersKey}/date`).push(payload)
 
       //sets the date
-      db.ref(`/${dateKey}/date`).set({
+      db.ref(`/${winnersKey}/date`).set({
         date: date.toDateString()
       })
 
       //adds the winners
-      db.ref(`/${dateKey}/games`).push(winners)
+      db.ref(`/${winnersKey}/games`).push(winners)
+
+      this.firstPlace = ''
+      this.secondPlace = ''
+      this.thirdPlace = ''
+      this.fourthPlace = ''
     },
     logWinner () {
       this.logWin = true
     },
     removeWinner (date, key, idx) {
-      let dateKey = date.split(' ').join('')
-      db.ref(`/${dateKey}/games/${key}/${idx}`).remove()
+      let winnersKey = date.split(' ').join('')
+      db.ref(`/${winnersKey}/games/${key}/${idx}`).remove()
     },
     updateWinner (date, key, idx) {
-      let dateKey = date.split(' ').join('')
+      let winnersKey = date.split(' ').join('')
 
       let update = {}
 
-      update[`/${dateKey}/games/${key}/${idx}`] = this.updateText;
+      update[`/${winnersKey}/games/${key}/${idx}`] = this.updateText;
       db.ref().update(update)
     },
     getTopLeader () {
