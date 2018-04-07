@@ -1,6 +1,7 @@
 <template>
   <div class="dashboard">
     <button class="log-win btn-3d green" @click="logWinner()" v-if="!logWin">Log Win</button>
+    <button @click="goToStats()" v-if="!logWin">Overall Standings</button>
     <div class="log-winner" v-if="logWin">
       <div>
         <div>
@@ -185,6 +186,9 @@ export default {
           this.editActive = true
         }
       })
+    },
+    goToStats() {
+      this.$router.push('stats')
     }
   },
   mounted(){
