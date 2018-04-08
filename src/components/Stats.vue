@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <button @click="goBack()">Back</button>
-    <canvas id="winDistribution" width="400" height="400"></canvas>
+    <canvas class="win-chart" id="winDistribution"></canvas>
   </div>
 </template>
 
@@ -28,7 +28,6 @@ export default {
       //builds an array of all the winners in the DB
       snapshot.forEach((childSnap) => {
         let item = childSnap.val();
-        let date = item.date.date;
 
         for(var game in item.games) {
           winnersBank.push(item.games[game])
@@ -36,23 +35,9 @@ export default {
       })
       this.winners = winnersBank.reverse()
 
-      leaderData = this.getLeaderData()
+      this.getLeaderData()
     })
 
-      let ctx = document.getElementById("winDistribution");
-      let myChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: leaderData[0],
-            datasets: [{
-                label: 'Number of Wins',
-                data: leaderData[1],
-            }]
-        },
-        options: {
-            
-        }
-    });
   },
   methods: {
     getLeaderData () {
@@ -73,11 +58,28 @@ export default {
         winCount.push(obj[winnerTotal])
       }
 
-      return [winners, winCount]
-
+      this.mountChart([winners, winCount])
     },
     goBack () {
       this.$router.push({name: "Home"})
+    },
+    mountChart (leaderData) {
+      let ctx = document.getElementById("winDistribution");
+
+      let myChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: leaderData[0],
+          datasets: [{
+            label: 'Number of Wins',
+            data: leaderData[1],
+            backgroundColor: ['#0080ff', '#ffb347', '#ff6961', '#b19dc9']
+          }]
+        },
+        options: {
+          responsive: true
+        }
+      });
     }
   }
 }
@@ -85,52 +87,18 @@ export default {
 
 <style scoped>
 
-.label {
-  font-weight: bold;
-}
-
 .dashboard {
   background-color: #5CDB95;
   height: 100%;
   padding: 1rem;
 }
 
-.top-leader, .total-games {
-  color: #EDF5E1;
-}
-
-.winner-data {
-  padding: 1rem;
-}
-
-.leaderboard {
-  color: #05386B;
-  border: 2px solid #05386B;
-  border-radius: 5px;
-  width: 80%;
-  margin: 0 10%;
-  padding: 1rem;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-}
-
 .leaderboard > h2 {
   color: #EDF5E1;
 }
-.divider {
-  border-top: 1px solid #05386B;
-  width: 80%;
-  margin: 0 10% 0 10%;
-}
 
-.log-winner {
-  padding: 1rem;
-}
+.win-chart {
 
-.winner-name {
-  display: flex;
-  flex-direction: column;
 }
 
 input {
