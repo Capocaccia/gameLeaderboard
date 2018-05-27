@@ -145,27 +145,53 @@ export default {
       update[`/${winnersKey}/games/${key}/${idx}`] = this.updateText;
       db.ref().update(update)
     },
+    // getTopLeader() {
+    //     let obj = {}
+    //     let highLeaderName = null
+    //     let highLeaderScore = null
+    //
+    //     this.winners.forEach((game) => {
+    //         console.log(typeof game)
+    //         game.forEach((player) => {
+    //             if (obj[player]) {
+    //                 obj[player] = obj[player] + 1
+    //             } else {
+    //                 obj[player] = 1
+    //             }
+    //         })
+    //     })
+    //
+    //     console.log(obj)
+    //
+    //     for (let key in obj) {
+    //       if(obj[key] >= highLeaderScore) {
+    //           this.winners.push(key)
+    //           highLeaderScore = obj[key]
+    //       }
+    //     }
+    // },
     getTopLeader () {
       let obj = {};
       this.totalGames = 0
       let winners = [];
 
       for(var i = 0; i < this.winners.length; i++) {
-        let gameWinners = this.winners[i]; 
+        let gameWinners = this.winners[i];
 
         //builds an obj of all winners and the number of games they have won
         obj[gameWinners[0]] === undefined ? obj[gameWinners[0]] = 1 : obj[gameWinners[0]]++
-
 
         // //updates total number of games played
         this.totalGames++
 
       }
 
-      for(var key in obj) {
+      for(let key in obj) {
+          //gets the number of wins from the win leader
+          this.leaderCount === 0 ? this.leaderCount = obj[key] : obj[key] > this.leaderCount ? this.leaderCount = obj[key] : ''
+      }
 
-        //gets the number of wins from the win leader
-        this.leaderCount === 0 ? this.leaderCount = obj[key] : obj[key] > this.leaderCount ? this.leaderCount = obj[key] : ''
+      for(var key in obj) {
 
         //gets the name of the leader
         if(obj[key] === this.leaderCount) {
@@ -173,7 +199,7 @@ export default {
         }
 
         this.leader = winners.length > 1 ? 'Its a Tie Between ' + winners.join(',') : winners[0]
-      } 
+      }
 
     },
     activateEdit () {
