@@ -108,10 +108,10 @@ export default {
 
       let winners = {}
 
-      this.firstPlace !== '' ? winners[0] = this.firstPlace: ''
-      this.secondPlace !== '' ? winners[1] = this.secondPlace: ''
-      this.thirdPlace !== '' ? winners[2] = this.thirdPlace: ''
-      this.fourthPlace !== '' ? winners[3] = this.fourthPlace: '' 
+      this.firstPlace !== '' ? winners[0] = this.firstPlace.trim() : ''
+      this.secondPlace !== '' ? winners[1] = this.secondPlace.trim() : ''
+      this.thirdPlace !== '' ? winners[2] = this.thirdPlace.trim() : ''
+      this.fourthPlace !== '' ? winners[3] = this.fourthPlace.trim() : ''
 
       this.logWin = false
 
@@ -145,31 +145,6 @@ export default {
       update[`/${winnersKey}/games/${key}/${idx}`] = this.updateText;
       db.ref().update(update)
     },
-    // getTopLeader() {
-    //     let obj = {}
-    //     let highLeaderName = null
-    //     let highLeaderScore = null
-    //
-    //     this.winners.forEach((game) => {
-    //         console.log(typeof game)
-    //         game.forEach((player) => {
-    //             if (obj[player]) {
-    //                 obj[player] = obj[player] + 1
-    //             } else {
-    //                 obj[player] = 1
-    //             }
-    //         })
-    //     })
-    //
-    //     console.log(obj)
-    //
-    //     for (let key in obj) {
-    //       if(obj[key] >= highLeaderScore) {
-    //           this.winners.push(key)
-    //           highLeaderScore = obj[key]
-    //       }
-    //     }
-    // },
     getTopLeader () {
       let obj = {};
       this.totalGames = 0
