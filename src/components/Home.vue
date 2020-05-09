@@ -114,10 +114,10 @@ export default {
 
       let winners = {}
 
-      this.firstPlace !== '' ? winners[0] = this.firstPlace: ''
-      this.secondPlace !== '' ? winners[1] = this.secondPlace: ''
-      this.thirdPlace !== '' ? winners[2] = this.thirdPlace: ''
-      this.fourthPlace !== '' ? winners[3] = this.fourthPlace: '' 
+      this.firstPlace !== '' ? winners[0] = this.firstPlace.trim() : ''
+      this.secondPlace !== '' ? winners[1] = this.secondPlace.trim() : ''
+      this.thirdPlace !== '' ? winners[2] = this.thirdPlace.trim() : ''
+      this.fourthPlace !== '' ? winners[3] = this.fourthPlace.trim() : ''
 
       this.logWin = false
 
