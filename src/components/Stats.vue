@@ -13,7 +13,6 @@
   import app from '../firebaseConfig'
   import Chart from 'chart.js'
   let db = app.database();
-  let allWinners = db.ref('/')
 
 export default {
   name: 'Stats',
@@ -23,6 +22,8 @@ export default {
     }
   },
   mounted() {
+    let allWinners = db.ref(`/${this.$route.params.gameName}`)
+
     allWinners.on('value', (snapshot) => {
       var winnersBank = [];
 
