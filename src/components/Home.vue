@@ -96,7 +96,7 @@ export default {
       totalGames: 0,
       editActive: false,
       updateText: '',
-      game: 'uno',
+      game: this.$route.params.gameName ? this.$route.params.gameName : 'uno',
       gameNames: []
     }
   },

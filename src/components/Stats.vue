@@ -108,7 +108,7 @@ export default {
       this.mountFourthPlace([fourthWinners, fourthWinCount])
     },
     goBack () {
-      this.$router.push({name: "Home"})
+      this.$router.push({name: "Home", params: { gameName: `${this.$route.params.gameName}` }})
     },
     mountFirstPlace (leaderData) {
       let ctx = document.getElementById("firstPlaces");
