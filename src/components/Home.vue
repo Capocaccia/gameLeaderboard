@@ -2,6 +2,13 @@
   <div class="dashboard">
     <button class="log-win btn-3d green" @click="logWinner()" v-if="!logWin">Log Win</button>
     <button @click="goToStats()" v-if="!logWin">More Stats</button>
+    <div>
+      <h1>Change Game:</h1>
+      <select v-model="game" name="game" @change="getWinners()" id="">
+        <option default value="uno">Uno</option>
+        <option value="yahtzee">Yahtzee</option>
+      </select>
+    </div>
     <div class="log-winner" v-if="logWin">
       <div>
         <div>
@@ -24,7 +31,7 @@
     </div>
     <h1 class="top-leader">Current leader is: {{ leader }} with {{ leaderCount }} wins!</h1>
     <h2 class="total-games">Total Games Played: {{ totalGames }}</h2>
-    <h2 class="total-games">Current Game: Uno</h2>
+    <h2 class="total-games">Current Game: {{ this.game }}</h2>
     <div class="leaderboard">
       <button v-if="editActive" @click="editActive = false"> Exit Edit Mode </button>
       <h2>Leaderboard</h2>
@@ -76,8 +83,6 @@
   import app from '../firebaseConfig'
 
   let db = app.database();
-  let allWinners = db.ref('/')
-
 
 export default {
   name: 'Home',
@@ -93,13 +98,15 @@ export default {
       leaderCount: 0,
       totalGames: 0,
       editActive: false,
-      updateText: ''
+      updateText: '',
+      game: 'uno',
+      gameNames: ''
     }
   },
   methods: {
     sendToFirebase () {
       let date = new Date
-      let winnersKey = db.ref().push().key
+      let winnersKey = db.ref(`/${this.game}/`).push().key
       let payload = {
         games: {
 
@@ -116,15 +123,15 @@ export default {
       this.logWin = false
 
       //sets the data structure
-      db.ref(`/${winnersKey}/date`).push(payload)
+      db.ref(`/${this.game}/${winnersKey}/date`).push(payload)
 
       //sets the date
-      db.ref(`/${winnersKey}/date`).set({
+      db.ref(`/${this.game}/${winnersKey}/date`).set({
         date: date.toDateString()
       })
 
-      //adds the winners
-      db.ref(`/${winnersKey}/games`).push(winners)
+      // //adds the winners
+      db.ref(`/${this.game}/${winnersKey}/games`).push(winners)
 
       this.firstPlace = ''
       this.secondPlace = ''
@@ -145,34 +152,11 @@ export default {
       update[`/${winnersKey}/games/${key}/${idx}`] = this.updateText;
       db.ref().update(update)
     },
-    // getTopLeader() {
-    //     let obj = {}
-    //     let highLeaderName = null
-    //     let highLeaderScore = null
-    //
-    //     this.winners.forEach((game) => {
-    //         console.log(typeof game)
-    //         game.forEach((player) => {
-    //             if (obj[player]) {
-    //                 obj[player] = obj[player] + 1
-    //             } else {
-    //                 obj[player] = 1
-    //             }
-    //         })
-    //     })
-    //
-    //     console.log(obj)
-    //
-    //     for (let key in obj) {
-    //       if(obj[key] >= highLeaderScore) {
-    //           this.winners.push(key)
-    //           highLeaderScore = obj[key]
-    //       }
-    //     }
-    // },
     getTopLeader () {
-      let obj = {};
+      this.leader = 'No Data Available'
       this.totalGames = 0
+      this.leaderCount = 0
+      let obj = {};
       let winners = [];
 
       for(var i = 0; i < this.winners.length; i++) {
@@ -215,29 +199,32 @@ export default {
     },
     goToStats() {
       this.$router.push('stats')
+    },
+    getWinners() {
+      let allWinners = db.ref(`/${this.game}`)
+
+    allWinners.on('value', (snapshot) => {
+        var winnersBank = [];
+
+        //builds an array of all the winners in the DB
+        snapshot.forEach((childSnap) => {
+          let item = childSnap.val();
+          let date = item.date.date;
+          for(var game in item.games) {
+            item.games[game].parentKey = childSnap.key
+            item.games[game].key = game
+            item.games[game].date = date
+            winnersBank.push(item.games[game])
+          }
+        })
+
+        this.winners = winnersBank.reverse();
+        this.activateEdit();
+      })
     }
   },
   mounted(){
-    allWinners.on('value', (snapshot) => {
-      var winnersBank = [];
-
-
-      //builds an array of all the winners in the DB
-      snapshot.forEach((childSnap) => {
-        let item = childSnap.val();
-        let date = item.date.date;
-
-        for(var game in item.games) {
-          item.games[game].parentKey = childSnap.key
-          item.games[game].key = game
-          item.games[game].date = date
-          winnersBank.push(item.games[game])
-        }
-      })
-
-      this.winners = winnersBank.reverse();
-      this.activateEdit();
-    })
+    this.getWinners();
   },
   watch: {
     winners: function () {
