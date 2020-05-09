@@ -15,7 +15,8 @@ export default new Router({
     {
       path: '/stats',
       name: 'Stats',
-      component: Stats
+      component: Stats,
+      props: true
     }
   ]
 })
