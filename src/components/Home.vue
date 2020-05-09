@@ -2,12 +2,7 @@
   <div class="dashboard">
     <button class="log-win btn-3d green" @click="logWinner()" v-if="!logWin">Log Win</button>
     <button @click="goToStats()" v-if="!logWin">More Stats</button>
-    <div>
-      <h1>Change Game:</h1>
-      <select v-model="game" name="game" @change="getWinners()">
-        <option v-for="gamename, idx in gameNames" :key="idx" :value='gamename'>{{gamename}}</option>
-      </select>
-    </div>
+    
     <div class="log-winner" v-if="logWin">
       <div>
         <div>
@@ -30,7 +25,10 @@
     </div>
     <h1 class="top-leader">Current leader is: {{ leader }} with {{ leaderCount }} wins!</h1>
     <h2 class="total-games">Total Games Played: {{ totalGames }}</h2>
-    <h2 class="total-games">Current Game: {{ this.game }}</h2>
+    <h2 class="total-games">Current Game: <select v-model="game" name="game" @change="getWinners()">
+        <option v-for="gamename, idx in gameNames" :key="idx" :value='gamename'>{{gamename}}</option>
+      </select>
+    </h2>
     <div class="leaderboard">
       <button v-if="editActive" @click="editActive = false"> Exit Edit Mode </button>
       <h2>Leaderboard</h2>
