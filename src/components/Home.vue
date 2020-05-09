@@ -4,9 +4,8 @@
     <button @click="goToStats()" v-if="!logWin">More Stats</button>
     <div>
       <h1>Change Game:</h1>
-      <select v-model="game" name="game" @change="getWinners()" id="">
-        <option default value="uno">Uno</option>
-        <option value="yahtzee">Yahtzee</option>
+      <select v-model="game" name="game" @change="getWinners()">
+        <option v-for="gamename, idx in gameNames" :key="idx" :value='gamename'>{{gamename}}</option>
       </select>
     </div>
     <div class="log-winner" v-if="logWin">
@@ -100,7 +99,7 @@ export default {
       editActive: false,
       updateText: '',
       game: 'uno',
-      gameNames: ''
+      gameNames: []
     }
   },
   methods: {
@@ -198,33 +197,42 @@ export default {
       })
     },
     goToStats() {
-      this.$router.push('stats')
+      this.$router.push({name: 'Stats', params: { gameName: this.game }});
+    },
+    getGameNames() {
+      let games = db.ref(`/`)
+      games.on('value', (snapshot) => {
+        snapshot.forEach((childSnap) => {
+          this.gameNames.push(childSnap.key)
+        })
+      })
     },
     getWinners() {
       let allWinners = db.ref(`/${this.game}`)
 
-    allWinners.on('value', (snapshot) => {
-        var winnersBank = [];
+      allWinners.on('value', (snapshot) => {
+          var winnersBank = [];
 
-        //builds an array of all the winners in the DB
-        snapshot.forEach((childSnap) => {
-          let item = childSnap.val();
-          let date = item.date.date;
-          for(var game in item.games) {
-            item.games[game].parentKey = childSnap.key
-            item.games[game].key = game
-            item.games[game].date = date
-            winnersBank.push(item.games[game])
-          }
+          //builds an array of all the winners in the DB
+          snapshot.forEach((childSnap) => {
+            let item = childSnap.val();
+            let date = item.date.date;
+            for(var game in item.games) {
+              item.games[game].parentKey = childSnap.key
+              item.games[game].key = game
+              item.games[game].date = date
+              winnersBank.push(item.games[game])
+            }
+          })
+
+          this.winners = winnersBank.reverse();
+          this.activateEdit();
         })
-
-        this.winners = winnersBank.reverse();
-        this.activateEdit();
-      })
-    }
+      }
   },
   mounted(){
     this.getWinners();
+    this.getGameNames();
   },
   watch: {
     winners: function () {
